@@ -1,3 +1,7 @@
+import * as Location from "expo-location";
+import { useSelector } from "react-redux";
+import { selectLocation } from "../Store/neighborhood/selector";
+import { authKey } from "../config";
 import {
   View,
   Text,
@@ -10,107 +14,61 @@ import {
   TextInput,
 } from "react-native";
 import { useDispatch } from "react-redux";
-import { getNeighborhoods } from "../Store/neighborhood/thunk";
+import {
+  getNeighborhoods,
+  getZipCode,
+  getSuggestedNeighborhood,
+} from "../Store/neighborhood/thunk";
+
 import { useState, useEffect } from "react";
-import Geolocation from "@react-native-community/geolocation";
+
+import { current } from "@reduxjs/toolkit";
 
 export const HomePage = () => {
   const dispatch = useDispatch();
+  const currentLocation = useSelector(selectLocation);
+  const currentZipCode = currentLocation.map((item) => item.postcode);
+
   const [postal, setPostal] = useState("");
-  const [currentLongitude, setCurrentLongitude] = useState("");
-  const [currentLatitude, setCurrentLatitude] = useState("");
-  const [locationStatus, setLocationStatus] = useState("");
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  const [currentLongitude, setCurrentLongitude] = useState(null);
+  const [currentLatitude, setCurrentLatitude] = useState(null);
 
   useEffect(() => {
-    const requestLocationPermission = async () => {
-      if (Platform.OS === "ios") {
-        getOneTimeLocation();
-        subscribeLocationLocation();
-      } else {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              title: "Location Access Required",
-              message: "This App needs to Access your location",
-            }
-          );
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            getOneTimeLocation();
-            subscribeLocationLocation();
-          } else {
-            setLocationStatus("Permission Denied");
-          }
-        } catch (err) {
-          console.warn(err);
-        }
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
       }
-    };
-    requestLocationPermission();
-    return () => {
-      Geolocation.clearWatch(watchID);
-    };
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      setCurrentLatitude(location.coords.latitude);
+      setCurrentLongitude(location.coords.longitude);
+    })();
   }, []);
 
-  const getOneTimeLocation = () => {
-    setLocationStatus("Getting Location ...");
-    Geolocation.getCurrentPosition(
-      //Will give you the current location
-      (position) => {
-        setLocationStatus("You are Here");
+  useEffect(() => {
+    if (currentLatitude) {
+      const apiKey = authKey;
+      const longitude = currentLongitude;
+      const latitude = currentLatitude;
+      // console.log("latitude", currentLatitude);
+      dispatch(getZipCode(latitude, longitude, apiKey));
+    } else {
+    }
+  }, [location]);
 
-        //getting the Longitude from the location json
-        const currentLongitude = JSON.stringify(position.coords.longitude);
-
-        //getting the Latitude from the location json
-        const currentLatitude = JSON.stringify(position.coords.latitude);
-
-        //Setting Longitude state
-        setCurrentLongitude(currentLongitude);
-
-        //Setting Longitude state
-        setCurrentLatitude(currentLatitude);
-      },
-      (error) => {
-        setLocationStatus(error.message);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 30000,
-        maximumAge: 1000,
-      }
-    );
-  };
-
-  const subscribeLocationLocation = () => {
-    watchID = Geolocation.watchPosition(
-      (position) => {
-        //Will give you the location on location change
-
-        setLocationStatus("You are Here");
-        console.log(position);
-
-        //getting the Longitude from the location json
-        const currentLongitude = JSON.stringify(position.coords.longitude);
-
-        //getting the Latitude from the location json
-        const currentLatitude = JSON.stringify(position.coords.latitude);
-
-        //Setting Longitude state
-        setCurrentLongitude(currentLongitude);
-
-        //Setting Latitude state
-        setCurrentLatitude(currentLatitude);
-      },
-      (error) => {
-        setLocationStatus(error.message);
-      },
-      {
-        enableHighAccuracy: false,
-        maximumAge: 1000,
-      }
-    );
-  };
+  useEffect(() => {
+    if (currentZipCode.length > 0) {
+      dispatch(getNeighborhoods(currentZipCode[0]));
+    } else {
+      console.log("nothing here to see");
+    }
+  }, []);
+  console.log(currentZipCode, "this is the zipcode");
 
   return (
     <View>
@@ -120,6 +78,10 @@ export const HomePage = () => {
         value={postal}
         placeholder="zipcode"
       />
+      <Text>
+        Your current location is: {currentLocation.map((item) => item.postcode)}
+      </Text>
+      <Text></Text>
       <Button
         title="get Neighborhood"
         onPress={() => dispatch(getNeighborhoods(postal))}
