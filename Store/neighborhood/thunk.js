@@ -3,9 +3,25 @@ import { apiUrl } from "../../config";
 import { setNeighborhoods, setLocation } from "./slice";
 
 export const getNeighborhoods = (postal) => async (dispatch, getState) => {
-  const response = await axios.get(`${apiUrl}/neighborhoods/${postal}`);
-  dispatch(setNeighborhoods(response.data));
+  console.log("postal", postal);
+  try {
+    const response = await axios.get(`${apiUrl}/neighborhoods/${postal}`);
+    console.log(response, "this is the response from th backend");
+    dispatch(setNeighborhoods(response.data));
+  } catch (e) {
+    console.log(e);
+  }
 };
+
+export const getSuggestedNeighborhood =
+  (postal) => async (dispatch, getState) => {
+    try {
+      const response = await axios.get(`${apiUrl}/neighborhoods/${postal}`);
+      console.log("this is the response from the backedn", response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
 export const getZipCode =
   (latitude, longitude, apiKey) => async (dispatch, getState) => {

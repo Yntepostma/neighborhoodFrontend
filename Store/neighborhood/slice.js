@@ -13,9 +13,7 @@ const neighborhoodSlice = createSlice({
       state.neighborhood = action.payload;
     },
     setLocation: (state, action) => {
-      console.log("payload", action.payload);
       state.location = action.payload;
-      console.log("state", state.location);
     },
   },
 });

@@ -14,23 +14,27 @@ import {
   TextInput,
 } from "react-native";
 import { useDispatch } from "react-redux";
-import { getNeighborhoods, getZipCode } from "../Store/neighborhood/thunk";
+import {
+  getNeighborhoods,
+  getZipCode,
+  getSuggestedNeighborhood,
+} from "../Store/neighborhood/thunk";
+
 import { useState, useEffect } from "react";
+
 import { current } from "@reduxjs/toolkit";
 
 export const HomePage = () => {
   const dispatch = useDispatch();
-  const [postal, setPostal] = useState("");
+  const currentLocation = useSelector(selectLocation);
+  const currentZipCode = currentLocation.map((item) => item.postcode);
 
-  //Bare minimum for geolocation
+  const [postal, setPostal] = useState("");
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
-  //Take another look later
-
   const [currentLongitude, setCurrentLongitude] = useState(null);
   const [currentLatitude, setCurrentLatitude] = useState(null);
-  const [locationStatus, setLocationStatus] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -46,19 +50,25 @@ export const HomePage = () => {
     })();
   }, []);
 
-  // { auth, locate, json }
-
   useEffect(() => {
     if (currentLatitude) {
       const apiKey = authKey;
-      console.log("apikey", apiKey);
       const longitude = currentLongitude;
       const latitude = currentLatitude;
-      console.log("latitude", currentLatitude);
+      // console.log("latitude", currentLatitude);
       dispatch(getZipCode(latitude, longitude, apiKey));
     } else {
     }
   }, [location]);
+
+  useEffect(() => {
+    if (currentZipCode.length > 0) {
+      dispatch(getNeighborhoods(currentZipCode[0]));
+    } else {
+      console.log("nothing here to see");
+    }
+  }, []);
+  console.log(currentZipCode, "this is the zipcode");
 
   return (
     <View>
@@ -68,6 +78,10 @@ export const HomePage = () => {
         value={postal}
         placeholder="zipcode"
       />
+      <Text>
+        Your current location is: {currentLocation.map((item) => item.postcode)}
+      </Text>
+      <Text></Text>
       <Button
         title="get Neighborhood"
         onPress={() => dispatch(getNeighborhoods(postal))}
