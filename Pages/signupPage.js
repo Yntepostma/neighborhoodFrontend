@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, SafeAreaView, TextInput } from "react-native";
 import { useState, useEffect } from "react";
 
 export const SignupPage = () => {
@@ -11,12 +11,32 @@ export const SignupPage = () => {
 
   return (
     <View>
-      <TextInput
-        style={styles.input}
-        onChangeText={setPostal}
-        value={postal}
-        placeholder="zipcode"
-      />
+      <SafeAreaView>
+        <TextInput
+          style={styles.input}
+          onChangeText={setUserName}
+          value={userName}
+          placeholder="userName"
+        />
+        <TextInput
+          style={styles.input}
+          onChangeText={setEmailAddress}
+          value={emailAddress}
+          placeholder="email address"
+        />
+        <TextInput
+          style={styles.input}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="zipcode"
+        />
+        <TextInput
+          style={styles.input}
+          onChangeText={setPostal}
+          value={postal}
+          placeholder="zipcode"
+        />
+      </SafeAreaView>
     </View>
   );
 };

@@ -1,9 +1,19 @@
 import * as Location from "expo-location";
+import { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView from "react-native-maps";
 import { LocationSelector } from "../Components";
 import { useSelector } from "react-redux";
 import { selectLocation } from "../Store/neighborhood/selector";
 import { authKey } from "../config";
-import { View, Text, StyleSheet, Button, TextInput, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  TextInput,
+  Alert,
+  Dimensions,
+} from "react-native";
 import { useDispatch } from "react-redux";
 import {
   getNeighborhoods,
@@ -16,7 +26,7 @@ import { useState, useEffect } from "react";
 export const HomePage = () => {
   const dispatch = useDispatch();
   const currentLocation = useSelector(selectLocation);
-  console.log("current location", currentLocation[0].street);
+  console.log("location", currentLocation);
 
   const [postal, setPostal] = useState("");
   const [location, setLocation] = useState(null);
@@ -40,7 +50,7 @@ export const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    if (currentLatitude) {
+    if (location) {
       const apiKey = authKey;
       const longitude = currentLongitude;
       const latitude = currentLatitude;
@@ -49,27 +59,33 @@ export const HomePage = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (currentLocation.length > 0) {
+      alertLocation();
+    }
+  }, [currentLocation]);
+
   const alertLocation = () => {
     Alert.alert(
       `Welcome to NeighborHood!`,
-      `Street: ${currentLocation[0].street} ${""} Zipcode: ${
-        currentLocation[0].postcode
-      } ${""}
-      Neighborhood: ${currentLocation[0].suburb}`,
+      `Street: ${currentLocation[0].street} ${""} 
+      Zipcode: ${currentLocation[0].postcode} ${""}
+      Neighborhood: ${currentLocation[0].suburb}
+      ${(<MapView provider={PROVIDER_GOOGLE} />)} 
+    
+`,
       [
         {
           text: "Add Neighborhood",
+          style: "ok",
         },
         {
           text: "Choose manually",
+          style: "cancel",
         },
       ]
     );
   };
-
-  useEffect(() => {
-    alertLocation();
-  }, []);
 
   // useEffect(() => {
   //   if (currentZipCode.length > 0) {
@@ -82,6 +98,7 @@ export const HomePage = () => {
 
   return (
     <View>
+      <MapView provider={PROVIDER_GOOGLE} />
       <TextInput
         style={styles.input}
         onChangeText={setPostal}
@@ -89,18 +106,6 @@ export const HomePage = () => {
         placeholder="zipcode"
       />
       <View>
-        <View>
-          <Text>
-            Your current location is:
-            {!currentLocation
-              ? "Loading"
-              : `
-          Street: ${currentLocation[0].street}
-          Zipcode: ${currentLocation[0].postcode}`}
-          </Text>
-          <Button title="add"></Button>
-          <Button title="choose manual"></Button>
-        </View>
         <Button
           title="get Neighborhood"
           onPress={() => dispatch(getNeighborhoods(postal))}
@@ -117,5 +122,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 20,
     borderRadius: 10,
+  },
+  map: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
   },
 });
