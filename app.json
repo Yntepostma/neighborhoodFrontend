@@ -14,10 +14,12 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
+      "bundleIdentifier": "com.Ynte.neighborHoodapp",
+      "config": {
+        "googleMapsApiKey": "AIzaSyBNzjgReFctMZmB-3TNP_WCrDL0Jnuemgk"
+      },
       "supportsTablet": true
     },
     "android": {

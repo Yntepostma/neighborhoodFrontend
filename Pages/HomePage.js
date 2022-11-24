@@ -1,4 +1,7 @@
 import * as Location from "expo-location";
+import { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView from "react-native-maps";
+import { LocationSelector } from "../Components";
 import { useSelector } from "react-redux";
 import { selectLocation } from "../Store/neighborhood/selector";
 import { authKey } from "../config";
@@ -7,11 +10,9 @@ import {
   Text,
   StyleSheet,
   Button,
-  SafeAreaView,
-  Image,
-  PermissionsAndroid,
-  Platform,
   TextInput,
+  Alert,
+  Dimensions,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import {
@@ -22,12 +23,10 @@ import {
 
 import { useState, useEffect } from "react";
 
-import { current } from "@reduxjs/toolkit";
-
 export const HomePage = () => {
   const dispatch = useDispatch();
   const currentLocation = useSelector(selectLocation);
-  const currentZipCode = currentLocation.map((item) => item.postcode);
+  console.log("location", currentLocation);
 
   const [postal, setPostal] = useState("");
   const [location, setLocation] = useState(null);
@@ -51,41 +50,67 @@ export const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    if (currentLatitude) {
+    if (location) {
       const apiKey = authKey;
       const longitude = currentLongitude;
       const latitude = currentLatitude;
-      // console.log("latitude", currentLatitude);
       dispatch(getZipCode(latitude, longitude, apiKey));
     } else {
     }
   }, [location]);
 
   useEffect(() => {
-    if (currentZipCode.length > 0) {
-      dispatch(getNeighborhoods(currentZipCode[0]));
-    } else {
-      console.log("nothing here to see");
+    if (currentLocation.length > 0) {
+      alertLocation();
     }
-  }, []);
-  console.log(currentZipCode, "this is the zipcode");
+  }, [currentLocation]);
+
+  const alertLocation = () => {
+    Alert.alert(
+      `Welcome to NeighborHood!`,
+      `Street: ${currentLocation[0].street} ${""} 
+      Zipcode: ${currentLocation[0].postcode} ${""}
+      Neighborhood: ${currentLocation[0].suburb}
+      ${(<MapView provider={PROVIDER_GOOGLE} />)} 
+    
+`,
+      [
+        {
+          text: "Add Neighborhood",
+          style: "ok",
+        },
+        {
+          text: "Choose manually",
+          style: "cancel",
+        },
+      ]
+    );
+  };
+
+  // useEffect(() => {
+  //   if (currentZipCode.length > 0) {
+  //     dispatch(getNeighborhoods(currentZipCode[0]));
+  //   } else {
+  //     console.log("nothing here to see");
+  //   }
+  // }, []);
+  // console.log(currentZipCode, "this is the zipcode");
 
   return (
     <View>
+      <MapView provider={PROVIDER_GOOGLE} />
       <TextInput
         style={styles.input}
         onChangeText={setPostal}
         value={postal}
         placeholder="zipcode"
       />
-      <Text>
-        Your current location is: {currentLocation.map((item) => item.postcode)}
-      </Text>
-      <Text></Text>
-      <Button
-        title="get Neighborhood"
-        onPress={() => dispatch(getNeighborhoods(postal))}
-      />
+      <View>
+        <Button
+          title="get Neighborhood"
+          onPress={() => dispatch(getNeighborhoods(postal))}
+        />
+      </View>
     </View>
   );
 };
@@ -97,5 +122,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 20,
     borderRadius: 10,
+  },
+  map: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
   },
 });
