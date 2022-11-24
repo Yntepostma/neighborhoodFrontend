@@ -1,5 +1,13 @@
-import { View, Text, SafeAreaView, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TextInput,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
 import { useState, useEffect } from "react";
+import image from "../Pages/images/background.jpg";
 
 export const SignupPage = () => {
   const [userName, setUserName] = useState("");
@@ -11,6 +19,11 @@ export const SignupPage = () => {
 
   return (
     <View>
+      <ImageBackground
+        source={image}
+        resizeMode="cover"
+        style={styles.image}
+      ></ImageBackground>
       <SafeAreaView>
         <TextInput
           style={styles.input}
@@ -30,13 +43,22 @@ export const SignupPage = () => {
           value={password}
           placeholder="zipcode"
         />
-        <TextInput
-          style={styles.input}
-          onChangeText={setPostal}
-          value={postal}
-          placeholder="zipcode"
-        />
       </SafeAreaView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+  },
+  backGround: {},
+  image: {
+    flex: 1,
+    justifyContent: "center",
+  },
+});

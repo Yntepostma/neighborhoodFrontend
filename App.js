@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Button } from "react-native";
 import store from "./Store";
 import { Provider } from "react-redux";
-import { HomePage } from "./Pages";
+import { HomePage, SignupPage } from "./Pages";
 import { useDispatch } from "react-redux";
 import { getNeighborhoods } from "./Store/neighborhood/thunk";
 import { NavigationContainer } from "@react-navigation/native";
@@ -24,6 +24,7 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
+        <Stack.Screen name="signUp" component={SignupPage} />
         <Stack.Screen name="Home" component={HomePage} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,7 +1,6 @@
 import * as Location from "expo-location";
 import { PROVIDER_GOOGLE } from "react-native-maps";
 import MapView from "react-native-maps";
-import { LocationSelector } from "../Components";
 import { useSelector } from "react-redux";
 import { selectLocation } from "../Store/neighborhood/selector";
 import { authKey } from "../config";
@@ -13,6 +12,7 @@ import {
   TextInput,
   Alert,
   Dimensions,
+  Platform,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import {
